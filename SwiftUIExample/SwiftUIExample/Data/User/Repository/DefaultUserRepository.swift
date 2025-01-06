@@ -14,6 +14,9 @@ public final class DefaultUserRepository: UserRepository {
     
     public func getUsers(page: Int, completion: @escaping ([Friend]) -> Void) {
         reqresApi.getUsers(page: page)
+            .map {
+                users in users.data.map { $0.entity }
+            }
             .sink{ completion in
                 switch completion {
                 case .finished:
@@ -21,16 +24,16 @@ public final class DefaultUserRepository: UserRepository {
                 case .failure(let error):
                     print(error)
                 }
-            } receiveValue: { users in
-                let friends = users.data.map { user in
-                    user.entity
-                }
+            } receiveValue: { friends in
                 completion(friends)
             }.store(in: &subscriptions)
     }
     
     public func getUser(id: Int, completion: @escaping (Friend) -> Void) {
         reqresApi.getUser(id: id)
+            .map {
+                user in user.data.entity
+            }
             .sink{ completion in
                 switch completion {
                 case .finished:
@@ -38,8 +41,8 @@ public final class DefaultUserRepository: UserRepository {
                 case .failure(let error):
                     print(error)
                 }
-            } receiveValue: { user in
-                completion(user.data.entity)
+            } receiveValue: { friend in
+                completion(friend)
             }.store(in: &subscriptions)
     }
 }
